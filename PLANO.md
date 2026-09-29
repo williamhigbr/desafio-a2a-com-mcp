@@ -938,3 +938,163 @@ Se você consegue responder a todas sem consultar nada, o desafio cumpriu o pape
 4. A Task e o `requestState` são os dois "estados nomeados". Em que sentido um é o espelho do outro, e em que sentido são diferentes (quem guarda, quem lê, quanto tempo vivem)?
 5. Se amanhã a regra de alternativas mudar (por exemplo, exigir `camera`), quantas linhas do agente mudam? Se a resposta não for zero, o agente está implementando domínio.
 6. Onde, na sua entrega, você autenticaria o principal para impedir o replay do `requestState` de outro usuário, se autenticação estivesse no escopo?
+
+---
+
+## 16. Respostas dos checkpoints
+
+Tente responder sozinho antes de ler. Estas respostas servem para conferir, não para substituir o exercício. Onde a resposta depende do SDK, ela vale para `mcp==2.2.0` e `a2a-sdk==1.1.5`, as versões investigadas neste plano. Se você usar outra versão, confirme no código.
+
+### Checkpoint 0 (mapa mental)
+
+Os três papéis do agente:
+1. **Servidor A2A**, voltado para fora: publica o card, recebe `SendMessage`/`GetTask` e é dono das Tasks.
+2. **Host MCP**, a aplicação que orquestra: decide quais servidores usar, lê o resource da política (resource é escolha da aplicação), interpreta o `input_required` e decide transformá-lo em pausa da Task.
+3. **Cliente MCP**, criado pelo host: o objeto `Client` que mantém a conexão com um servidor MCP específico e fala o wire (`_meta`, headers, ids).
+
+Host e cliente são papéis diferentes: um host pode ter vários clientes, um por servidor.
+
+Por que o `requestState` não fica no servidor MCP: o transporte é stateless. O retry pode chegar em outra réplica ou depois de um restart, e o servidor não pode guardar nada entre o `input_required` e o retry (o passo 12 do avaliador testa exatamente isso). Guardar no servidor seria recriar a sessão que o protocolo eliminou.
+
+Por que ele fica no agente: o agente é o cliente MCP, e a spec põe no cliente a responsabilidade de guardar e ecoar o estado. Do lado A2A, a Task é, por desenho, um objeto com estado que pertence ao agente. Então existe um lugar legítimo para esse dado: a `Pausa` ligada ao `task_id`. Ele não pode descer até o cliente A2A, porque isso quebraria a opacidade e vazaria um detalhe interno (verificação 34).
+
+### Checkpoint 1 (stack)
+
+Campos selados pela `RequestStateBoundary`:
+
+| Campo | Significado |
+|---|---|
+| `v` | versão do envelope (1) |
+| `iat` | quando foi emitido (e a checagem recusa tokens "do futuro", com 60 s de tolerância) |
+| `exp` | expiração, `iat + ttl` |
+| `m` | método (`tools/call`) |
+| `t` | alvo: nome da tool (ou URI, em `resources/read`) |
+| `a` | digest SHA-256 (16 bytes) dos `arguments`, com o JSON em forma canônica |
+| `s` | o estado interno do framework: respostas já registradas e digest de cada pergunta feita |
+| `aud` | audiência, o nome do servidor (`central-de-salas`), para impedir que outro serviço com a mesma chave aceite o token |
+| `p` | (opcional) principal autenticado, só quando há autenticação |
+
+A verificação 18 passa por causa do `a` (e do `t`). O retry chega com outra sala, outro horário e outro responsável, o digest não bate, e a boundary rejeita com `-32602` ("request binding" no log). O validador aceita esse caminho (`bool(erro(resposta))`).
+
+HMAC contra AEAD:
+- HMAC dá integridade e autenticidade: quem não tem a chave não consegue produzir um token válido. Mas o conteúdo continua legível (basta decodificar o base64).
+- AEAD (aqui, AES-256-GCM) cifra o conteúdo e autentica o cifrado e os dados associados com uma tag, ou seja, dá confidencialidade e integridade ao mesmo tempo.
+- O enunciado exige integridade ("assinar é obrigatório, cifrar é opcional"). O AES-GCM do SDK atende e vai além.
+
+### Checkpoint 0.1 (segredo)
+
+`token_hex(32)` gera 32 bytes aleatórios, codificados em 64 caracteres hex. A checagem do SDK mede o comprimento da string codificada (`len(k.encode()) >= 32`), não a entropia. Por isso uma string hex de 32 caracteres passa na checagem do SDK com só 16 bytes de aleatoriedade. A validação própria na subida (`bytes.fromhex(s)` com 32 bytes ou mais) fecha essa brecha.
+
+### Checkpoint 1.1 (contrato)
+
+Por que processos recém-iniciados: as reservas ficam em memória, e várias verificações dependem das que vieram antes.
+- A verificação 16 faz o retry do conflito da `sala-fusca` das 16h às 17h aceitando `sala-garagem`, e cria **garagem 16h–17h**.
+- Na verificação 33, a Task A pede `sala-fusca` das 16h às 17h (ocupada pela Jennifer). As alternativas com capacidade 12 ou mais seriam `sala-garagem` e `sala-mirante`, mas a garagem foi ocupada na 16. Resta só `sala-mirante`, e é por isso que o validador responde `escolha=sala-mirante` nas duas Tasks. A Task B (garagem 14h–15h) também fica só com a `sala-mirante`, porque a `sala-fusca` 14h–15h foi reservada na verificação 30. As duas reservas na mirante não conflitam porque os horários são diferentes.
+- Numa segunda execução sem reiniciar, a verificação 24 (porao 9h–10h) já encontraria a sala ocupada e pausaria em vez de concluir. Na 16, a garagem já não estaria entre as alternativas, e a resposta `sala-garagem` seria rejeitada pelo schema, e assim por diante.
+
+Verificação 35: a mensagem exata da tool (com ou sem o prefixo `Error executing tool reservar_sala:`) tem de estar em `status.message` da Task FAILED. O README pede também que ela esteja visível no `history`. Com o `a2a-sdk`, `up.failed(msg)` resolve o `status.message`, e o `history` precisa do artifício do item 6 da Fase 7.
+
+Alternativas de `sala-garagem` (capacidade 12) das 14h às 15h: candidatas com capacidade 12 ou mais, sem contar a própria garagem, são `sala-fusca` (12) e `sala-mirante` (20). A fusca só está ocupada das 16h às 17h, então está livre. A mirante está livre. Ordenando por (capacidade, id): `sala-fusca, sala-mirante`. Aquario (4) e porao (6) ficam de fora pela capacidade.
+
+### Checkpoint 2 (servidor mínimo)
+
+Não há `initialize` porque a revisão `2026-07-28` é stateless: nada é negociado uma vez e reaproveitado depois. Cada request declara a versão e as capabilities no próprio `_meta` (`io.modelcontextprotocol/protocolVersion` e `io.modelcontextprotocol/clientCapabilities`), e o header `MCP-Protocol-Version` espelha a versão. Se o cliente quiser conhecer o servidor, existe o `server/discover`, que é só uma consulta e não cria sessão. É por isso que o servidor rejeita um `_meta` incompleto em vez de "lembrar" do request anterior.
+
+Quem controla cada primitivo:
+- **Tools:** o modelo (numa aplicação com LLM, o modelo decide chamar). Aqui não há LLM: quem faz esse papel é a lógica de regras do agente.
+- **Resources:** a aplicação (o host decide ler a política e usar como contexto).
+- **Prompts:** o usuário.
+
+### Checkpoint 3 (erros)
+
+- **Sala inexistente é erro de execução.** O request estava correto, a tool rodou e falhou por uma regra de domínio. O público é quem usa a tool (o modelo, ou aqui o agente): o `isError` com texto volta como conteúdo, para que o chamador leia, entenda e possa corrigir. É por isso que a mensagem chega intacta ao cliente A2A.
+- **Tool inexistente é erro de protocolo.** O request viola o contrato do servidor (o nome não existe no `tools/list`). O público é o desenvolvedor do cliente, porque é um bug de integração, e não algo que o modelo deva "tentar de novo".
+- **Na prática:** o SDK Python devolve `isError` com `Unknown tool: ...` (`ToolError` em `tool_manager.py`), e não `-32602`. O enunciado aceita os dois.
+
+### Checkpoint 4 (estado da reserva)
+
+A reserva fica numa estrutura em memória no processo do servidor MCP. É estado de aplicação (domínio), compartilhado por todos os clientes e sem ligação com conexão ou request. "Nada de sessão" proíbe estado de protocolo: inferir versão, capabilities ou contexto a partir de um request anterior ou de uma conexão aberta. Qualquer cliente, em qualquer request, vê as mesmas reservas.
+
+### Checkpoint 5 (MRTR)
+
+Por que é seguro o resolver rodar de novo: ele é uma função da situação atual (validação, conflito e alternativas recalculados com os dados de agora). O SDK só aceita a resposta se a pergunta renderizada for idêntica à que foi feita: o digest de cada pergunta (`asked`) viaja no estado, e `_request_digest` compara.
+
+Se alguém reservar a `sala-fusca` entre o `input_required` e o retry, o resolver calcula as alternativas `[sala-mirante]`. O schema muda, o digest muda, e a resposta antiga é descartada (o log mostra "the question changed since it was asked"). O servidor devolve um novo `input_required` com o novo `enum` e um novo `requestState`, e o `tratar()` do agente pausa a Task outra vez, sem nenhuma regra de domínio no agente. Uma corrida no mesmo milissegundo continua possível, e está fora de escopo.
+
+O que está no token e o que é recalculado:
+
+| No token (selado) | Recalculado no retry |
+|---|---|
+| envelope `v`, `iat`, `exp`, `m`, `t`, `a`, `aud` | validação da política |
+| `s` = `{v: 3, outcomes: {...}, asked: {chave: digest}}`. Na primeira rodada, `outcomes` está vazio. | conflito e alternativas (o corpo do resolver) |
+| | a própria reserva (o corpo da tool) |
+
+Os argumentos são reenviados pelo cliente e só aceitos se o digest bater com o `a` selado. Com o SDK, "reconstruir o pedido a partir do `requestState`" significa exatamente isto: o estado prova quais argumentos são os originais, e qualquer divergência é rejeitada. É um dos dois caminhos que o enunciado aceita. Se você preferir o outro, usar os valores selados, teria de colocar os argumentos dentro do estado e ignorar os reenviados. Documente a escolha.
+
+"Handle não é autenticação": sem autenticação, nada impede o replay. Qualquer um com o token válido, dentro do TTL, pode usá-lo, porque o token prova que o servidor o emitiu, não quem o apresenta. (Um replay depois da reserva feita tende a gerar uma nova pergunta, porque a sala escolhida deixou de estar livre, mas isso é efeito colateral e não proteção.) O SDK amarraria o token a uma identidade em `RequestStateSecurity(bind_principal=...)`. O padrão, `authenticated_principal`, usa o access token OAuth (client, issuer, subject) e sela um hash com salt dessa identidade no campo `p`. Se outro principal apresentar o token, ele é rejeitado.
+
+### Checkpoint 6 (host MCP)
+
+Com `mode="2026-07-28"`, o cliente adota a versão direto: nenhuma chamada prévia, e todo request já sai autodescrito no `_meta`. No modo `auto`, ele primeiro sonda `server/discover` e, contra servidor legado, cai no handshake `initialize`. A partir daí, o que ele envia depende do resultado de uma troca anterior. Contra este servidor isso funcionaria, mas o modo fixo deixa explícito que nada é negociado e reaproveitado.
+
+Manter o `Client` vivo não fere o "nada de sessão", porque isso é reuso de recurso local (pool de conexões HTTP), não estado de protocolo. Cada request continua carregando versão, capabilities e trace context, e o servidor não infere nada de requests anteriores. O próprio enunciado recomenda.
+
+### Checkpoint 7 (servidor A2A)
+
+Opacidade: o cliente não tem como saber se há LLM, nem que existe um servidor MCP atrás. O card mostra identidade, interface e skills, e as respostas são Tasks. Isso é desejável porque o contrato é a skill, não a implementação. Dá para trocar `if` por modelo ou por grafo, ou trocar o MCP por um banco, sem quebrar nenhum chamador. E as ferramentas internas não ficam expostas.
+
+INPUT_REQUIRED contra COMPLETED:
+- Em `INPUT_REQUIRED` (interrompida), a Task está viva e a vez é do cliente: ele manda a próxima mensagem com o mesmo `taskId`, e o agente retoma.
+- Em `COMPLETED` (terminal), a Task acabou. Nenhuma mensagem nova é aceita, e continuar exigiria uma Task nova (refinamento via `referenceTaskIds`, que está fora de escopo).
+
+Máquina de estados do `a2a-sdk`:
+
+```
+SUBMITTED ──▶ WORKING ──▶ COMPLETED | FAILED | CANCELED | REJECTED   (terminais)
+                 │ ▲
+                 ▼ │  (próxima mensagem com o mesmo taskId)
+          INPUT_REQUIRED / AUTH_REQUIRED                              (interrompidos)
+```
+
+- **Terminal:** o `DefaultRequestHandler` recusa `SendMessage` para Task terminal com `-32602` ("in terminal state"), antes de chamar o executor.
+- **Task desconhecida:** `-32001` (TaskNotFound).
+- **`TaskUpdater`:** lança `RuntimeError` se o seu código tentar publicar status depois de um terminal. É erro de programação, não resposta ao cliente.
+- **Exceção no `execute()`:** o framework captura e marca a Task como falha.
+- **Pausa repetida:** INPUT_REQUIRED → INPUT_REQUIRED (escolha fora do enum) é aceito.
+
+Confirme os nomes exatos em `active_task.py` e `task_updater.py`.
+
+### Checkpoint 8 (a ponte)
+
+As linhas dependem do seu código. No desenho do plano:
+- A conversão está em `agente/executor.py`, em `tratar()`: o ramo `if isinstance(r, InputRequiredResult):` grava a `Pausa` e chama `up.requires_input(...)`.
+- O retorno ao servidor está em `continuar()`: a chamada `self.host.reservar(..., input_responses={p.chave: resposta}, request_state=p.request_state)`.
+
+O README deve citar esses dois pontos com arquivo e linha.
+
+Restart do agente: perdem-se as Tasks (`InMemoryTaskStore`) e as pausas, e com elas o `requestState`. O cliente que continuar a Task recebe `-32001`. Restart do servidor MCP: nada se perde no fluxo pendente, porque o estado viajou no token e a chave vem do ambiente. Só se perdem as reservas criadas em memória, e o enunciado permite isso.
+
+A assimetria é de desenho: a Task do A2A é um objeto com estado que o servidor (o agente) guarda, enquanto o MRTR do MCP foi feito para o servidor não guardar nada, porque o estado mora no cliente. Para sobreviver a um restart do agente, seria preciso um `TaskStore` persistente (o SDK tem `DatabaseTaskStore`) e persistir também a `Pausa`. Fora de escopo.
+
+### Checkpoint 10b (UI)
+
+Na aba MCP direto, a UI faz o papel de host e cliente MCP: guarda o `requestState` sem abrir, ecoa sem modificar, mantém a chave do `inputRequests`, e o humano que clica faz o papel do usuário respondendo a elicitation. É exatamente o que o agente faz, com o `session_state` no lugar da `Pausa`.
+
+Na aba A2A, a UI é cliente A2A. O `requestState` é detalhe da ligação interna entre o agente e o seu servidor MCP. Se a UI soubesse dele, o cliente ficaria acoplado à implementação (acabaria a opacidade), passaria a carregar um dado que não é dele, e a verificação 34 falharia. O único estado que o cliente A2A tem é a Task.
+
+O contrato de texto é frágil: qualquer mudança de formato quebra quem faz parse. O A2A oferece partes estruturadas. Na v1.0, uma `Part` pode ter `data` (JSON), por exemplo `{"alternativas": [...]}`, que outro agente consumiria sem parse de texto. O enunciado preferiu uma linha fixa porque ela é determinística e comparável byte a byte (verificações 28 e 36) e mantém o foco no protocolo. Não acrescente uma `DataPart` na entrega: o validador junta as partes de texto, e o README exige "exatamente a linha".
+
+### Checkpoint 9 (trace context)
+
+`00-<trace-id>-<parent-id>-<flags>`:
+
+| Campo | Tamanho | Significado |
+|---|---|---|
+| `00` | 1 byte | versão do formato |
+| `trace-id` | 16 bytes (32 hex) | identifica o trace distribuído inteiro, de ponta a ponta |
+| `parent-id` (o span-id) | 8 bytes (16 hex) | identifica o span de quem chamou, que será o pai do próximo |
+| `flags` | 1 byte | `01` = amostrado |
+
+Valores todos zero são inválidos.
+
+Cada salto (validador → agente → servidor MCP) é uma operação nova, então tem span próprio, e o span-id muda. O trace-id é o fio que costura os saltos num único trace: se ele mudar, a chamada do MCP deixa de pertencer à requisição A2A que a originou, e a propagação que o avaliador procura no log se perde.
