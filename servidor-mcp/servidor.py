@@ -130,25 +130,5 @@ def politica_de_uso() -> str:
     return (DADOS / "politica-de-uso.md").read_text(encoding="utf-8")
 
 if __name__ == "__main__":
-    # mcp.run("streamable-http", host="127.0.0.1", port=int(os.environ.get("MCP_PORT", 7301)),
-    #         stateless_http=True, json_response=True)
-
-    import sys
-    import os
-
-    # Local UI testing with MCP Inspector
-    if "--dev" in sys.argv:
-        print("Starting in DEV mode with SSE transport for the Inspector...")
-        # SSE natively handles the stateless MRTR back-and-forth for the UI
-        mcp.run("sse", host="127.0.0.1", port=8000)
-
-    # Production deployment
-    else:
-        print("Starting in PROD mode with streamable-http...")
-        mcp.run(
-            "streamable-http",
-            host="127.0.0.1",
-            port=int(os.environ.get("MCP_PORT", 7301)),
-            stateless_http=True,
-            json_response=True
-        )
+    mcp.run("streamable-http", host="127.0.0.1", port=int(os.environ.get("MCP_PORT", 7301)),
+            stateless_http=True, json_response=True)
