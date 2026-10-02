@@ -577,6 +577,68 @@ Experimento 7.2: `SendMessage` com sala livre, depois `GetTask`, depois um novo 
 
 Experimento 7.3: leia `a2a/server/request_handlers/default_request_handler_v2.py` e encontre o ponto em que o `SendMessage` bloqueante decide responder (procure `INTERRUPTED_TASK_STATES`). É esse trecho que faz a resposta sair exatamente quando a Task pausa.
 
+Como testar 7.0 a 7.3 localmente
+
+Use três terminais, com o stderr do agente e o do servidor MCP visíveis. Antes de começar, mate qualquer processo antigo nas portas 7300 e 7301, para os dois subirem recém-iniciados. O `mcp.log` e o `agente.log` já são ignorados pelo `.gitignore` (`*.log`).
+
+```bash
+# terminal 1: servidor MCP (stderr na tela e em arquivo)
+set -a; source .env; set +a
+uv run --project servidor-mcp python servidor-mcp/servidor.py 2> >(tee mcp.log >&2)
+
+# terminal 2: agente (stderr mostra as transições da Task e o ruído OTel)
+cd agente && uv run python agente.py 2> >(tee ../agente.log >&2)
+
+# terminal 3: experimentos
+A=(-H 'Content-Type: application/json' -H 'traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01')
+send() {  # send "<texto>" [taskId]
+  local extra=""; [ -n "$2" ] && extra=",\"taskId\":\"$2\""
+  curl -s localhost:7300/a2a "${A[@]}" -d "{\"jsonrpc\":\"2.0\",\"id\":\"$RANDOM\",\"method\":\"SendMessage\",\"params\":{\"message\":{\"messageId\":\"m-$RANDOM\",\"role\":\"ROLE_USER\",\"parts\":[{\"text\":\"$1\"}]$extra}}}"
+}
+get() { curl -s localhost:7300/a2a "${A[@]}" -d "{\"jsonrpc\":\"2.0\",\"id\":\"$RANDOM\",\"method\":\"GetTask\",\"params\":{\"id\":\"$1\",\"historyLength\":10}}"; }
+```
+
+7.0, sem mexer no código. O `AssumeV1QuandoAusente` só preenche o header quando ele falta (`setdefault`). Se você mandar `0.3` explicitamente, ele não sobrescreve, e o SDK responde como se o builder não existisse:
+
+```bash
+jq -c '.request.body' exemplos/wire/08-a2a-send-message.json > /tmp/send.json
+curl -s localhost:7300/a2a "${A[@]}" -H 'A2A-Version: 0.3' -d @/tmp/send.json | jq .error   # -32009 VersionNotSupported
+curl -s localhost:7300/a2a "${A[@]}" -H 'A2A-Version: 1.0' -d @/tmp/send.json | jq .result.task.status.state
+curl -s localhost:7300/a2a "${A[@]}" -d @/tmp/send.json | jq .result.task.status.state        # sem header: o builder assume 1.0
+```
+
+Verificado: o `0.3` devolve `-32009 "A2A version '0.3' is not supported by this handler. Expected version '1.0'."`. Para ver o caso exato do enunciado (header ausente lido como `0.3`), remova temporariamente o `context_builder=AssumeV1QuandoAusente()` em `agente.py`, reinicie, repita o terceiro `curl` e depois desfaça. A leitura do header está em `a2a/utils/version_validator.py`, nas linhas próximas de 68 a 73 (`headers.get("a2a-version")`). Até a Fase 8 existir, a Task de `sala-garagem` (corpo do `08`) termina em `FAILED` com a mensagem provisória, e isso é o esperado.
+
+7.1, comparar o card com o `07`:
+
+```bash
+diff <(jq -S '.response.body' exemplos/wire/07-a2a-agent-card.json) \
+     <(curl -s localhost:7300/.well-known/agent-card.json | jq -S .)
+```
+
+A única diferença deve ser a `url`: o `07` usa `127.0.0.1` e o padrão do agente é `localhost`. Para zerar a diferença, suba com `AGENTE_URL=http://127.0.0.1:7300/a2a`.
+
+7.2, Task terminal recusada antes do seu código:
+
+```bash
+T=$(send "reservar sala=sala-porao inicio=2026-11-03T09:00:00-03:00 fim=2026-11-03T10:00:00-03:00 responsavel=Doc" | tee /dev/stderr | jq -r .result.task.id)
+get "$T" | jq '(.result.task // .result) | {id, contextId, state: .status.state, artifacts}'
+send "escolha=sala-mirante" "$T" | jq .error              # -32602 "... is in terminal state"
+grep "$T" agente.log                                       # só SUBMITTED, WORKING, COMPLETED
+```
+
+A prova de que o `execute()` não foi chamado: depois do `-32602`, nenhuma linha nova com esse `task` aparece no `agente.log`.
+
+7.3, leitura:
+
+```bash
+F=agente/.venv/lib/python3.12/site-packages/a2a/server/request_handlers/default_request_handler_v2.py
+sed -n 280,310p "$F"                                                                          # linha ~298
+grep -n "INTERRUPTED_TASK_STATES = " -A6 agente/.venv/lib/python3.12/site-packages/a2a/server/agent_execution/active_task.py
+```
+
+A condição está na linha 298, `in (TERMINAL_TASK_STATES | INTERRUPTED_TASK_STATES)`: o `SendMessage` bloqueante responde assim que a Task entra num desses estados. Antes da Fase 8 só dá para observar o caminho terminal (a resposta sai quando o executor publica `COMPLETED` ou `FAILED`). O caminho `INPUT_REQUIRED` aparece depois da Fase 8.
+
 Checkpoint 7
 - Opacidade: olhando só o card e as respostas, o cliente tem como saber que não há LLM? E que existe um servidor MCP atrás? Por que isso é uma propriedade desejável?
 - Qual a diferença entre `INPUT_REQUIRED` (interrompido) e `COMPLETED` (terminal) do ponto de vista de quem pode mandar a próxima mensagem?
