@@ -14,7 +14,7 @@ from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
 from a2a.server.tasks import TaskUpdater
 from a2a.types import TaskState
-from mcp.types import InputRequiredResult
+from mcp.types import ElicitRequest, ElicitRequestFormParams, ElicitResult, InputRequiredResult
 
 from host_mcp import HostMCP, texto_de
 
@@ -65,6 +65,23 @@ def linha_alternativas(opcoes: list[str]) -> str:
     return "alternativas: " + ", ".join(opcoes)
 
 
+def opcoes_da_elicitation(pedido) -> list[str] | None:
+    """Lê as opções do enum (ou const) de uma elicitation form com properties.sala.
+
+    É leitura de protocolo, não regra de domínio: quem calculou as alternativas foi o servidor.
+    Devolve None para qualquer outra forma de pedido (url mode, outro método, schema diferente).
+    """
+    if not isinstance(pedido, ElicitRequest) or not isinstance(pedido.params, ElicitRequestFormParams):
+        return None
+    schema = pedido.params.requested_schema
+    props = (schema.get("properties") if isinstance(schema, dict) else None) or {}
+    prop = props.get("sala") if isinstance(props, dict) else None
+    if not isinstance(prop, dict):
+        return None
+    opcoes = prop.get("enum") or ([prop["const"]] if "const" in prop else [])
+    return [str(o) for o in opcoes] or None
+
+
 def log(task_id: str, estado: str, detalhe: str = "") -> None:
     """Transições no stderr: evidência de SUBMITTED e WORKING, que a resposta bloqueante não mostra."""
     print(json.dumps({"task": task_id, "estado": estado, "detalhe": detalhe or None}),
@@ -111,14 +128,38 @@ class ExecutorDeReserva(AgentExecutor):
         await self.tratar(up, task_id, r, args, trace_id, politica)
 
     async def continuar(self, up: TaskUpdater, task_id: str, texto: str, traceparent: str | None) -> None:
-        # Fase 8: retomada da Task pausada (escolha=<id> / escolha=recusar, retry com requestState).
-        raise NotImplementedError("retomada da pausa ainda nao implementada (Fase 8)")
+        p = self.pausas[task_id]
+        escolha = parse_escolha(texto)
+        if escolha == "recusar":
+            resposta = ElicitResult(action="decline")
+        elif escolha in p.opcoes:  # valida contra o enum do SERVIDOR
+            resposta = ElicitResult(action="accept", content={"sala": escolha})
+        else:  # fora do enum (ou texto sem "escolha="): continua pausada, sem chamar MCP
+            log(task_id, "TASK_STATE_INPUT_REQUIRED", f"escolha fora do enum: {texto.strip()!r}")
+            await up.requires_input(up.new_agent_message([new_text_part(linha_alternativas(p.opcoes))]))
+            return
+        log(task_id, "TASK_STATE_WORKING", f"retomada com {resposta.action}")
+        await up.start_work()
+        trace_id = extrair_trace_id(traceparent) or p.trace_id
+        r = await self.host.reservar(p.argumentos, trace_id,
+                                     input_responses={p.chave: resposta},
+                                     request_state=p.request_state)  # ◀── volta ao servidor, sem tocar
+        await self.tratar(up, task_id, r, p.argumentos, trace_id, p.politica)
 
     async def tratar(self, up: TaskUpdater, task_id: str, r, args: dict, trace_id: str, politica: str) -> None:
-        if isinstance(r, InputRequiredResult):
-            # Fase 8: aqui o input_required do MCP vira TASK_STATE_INPUT_REQUIRED.
-            await self.falhar(up, task_id, "Sala ocupada: pausa da Task ainda nao implementada (Fase 8)")
-            return
+        if isinstance(r, InputRequiredResult):  # ◀── MCP input_required
+            chave, pedido = next(iter(r.input_requests.items()))
+            opcoes = opcoes_da_elicitation(pedido)
+            if opcoes is None:
+                # Decisão 6.2: o SDK anuncia também url mode, que o agente não implementa.
+                # Pedido que não seja form com properties.sala falha de forma limpa, sem Pausa.
+                self.pausas.pop(task_id, None)
+                await self.falhar(up, task_id, "Pedido de entrada nao suportado pelo agente")
+                return
+            self.pausas[task_id] = Pausa(r.request_state, chave, opcoes, args, trace_id, politica)
+            log(task_id, "TASK_STATE_INPUT_REQUIRED", linha_alternativas(opcoes))
+            await up.requires_input(up.new_agent_message([new_text_part(linha_alternativas(opcoes))]))
+            return  # ──▶ A2A INPUT_REQUIRED
         self.pausas.pop(task_id, None)
         if r.is_error:
             await self.falhar(up, task_id, texto_de(r))  # mensagem exata da tool
