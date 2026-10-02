@@ -22,7 +22,9 @@ async def log_requests(ctx, call_next):
     # ctx.meta é o _meta do request; o traceparent chega aqui, não em header HTTP
     meta = ctx.meta or {}
     print(json.dumps({"method": ctx.method, "id": ctx.request_id,
-                      "traceparent": meta.get("traceparent")}), file=sys.stderr, flush=True)
+                      "traceparent": meta.get("traceparent"),
+                      "clientCapabilities": meta.get("io.modelcontextprotocol/clientCapabilities")},
+                     default=str), file=sys.stderr, flush=True)
     return await call_next(ctx)
 
 def _segredo() -> str:

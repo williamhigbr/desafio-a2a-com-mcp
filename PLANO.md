@@ -72,7 +72,7 @@ O que foi confirmado no `mcp==2.2.0`, e por que isso importa:
 
 Duas pegadinhas do lado do cliente, observadas no teste:
 
-1. O cliente do SDK só declara a capability de elicitation se você passar um `elicitation_callback`. E declara `{"elicitation": {"form": {}, "url": {}}}`, não só `form`. Veja `mcp/client/session.py`, em `_build_capabilities`. Decida o que fazer na Fase 6.
+1. O cliente do SDK só declara a capability de elicitation se você passar um `elicitation_callback`. E declara `{"elicitation": {"form": {}, "url": {}}}`, não só `form`. Veja `mcp/client/session.py`, em `_build_capabilities`. Decida o que fazer na Fase 6. **Decidido: opção (a), documentar como limitação do SDK (ver Decisão 6.2).**
 2. O cliente pode emitir um `tools/list` implícito, sem o seu `traceparent` (ele revalida o `outputSchema` em `validate_tool_result`). Você vai caçar isso no log na Fase 9.
 
 Sobre o A2A: o README não obriga nem desaconselha SDK, só exige "A2A v1.0, binding JSON-RPC 2.0 sobre HTTP" e versões travadas. Este plano usa o `a2a-sdk[http-server]==1.1.5`, que é o que se usa no dia a dia. Confirmado num agente de teste, com o MCP simulado:
@@ -461,6 +461,16 @@ Decisão 6.2, sobre a capability: o enunciado pede a forma `{"elicitation": {"fo
 (b) encontrar um ponto de extensão limpo para declarar só `form`.
 Não reescreva o protocolo na mão para contornar. Anote a escolha e o porquê.
 
+> **Decisão tomada: opção (a).** No `mcp==2.2.0`, `_build_capabilities` fixa o par sempre que há `elicitation_callback`, sem parâmetro para escolher:
+>
+> ```python
+> elicitation = (
+>     types.ElicitationCapability(form=types.FormElicitationCapability(), url=types.UrlElicitationCapability())
+>     if self._elicitation_callback is not _default_elicitation_callback
+> ```
+>
+> A opção (b) só seria possível sobrescrevendo um método privado (frágil a atualizações) ou montando o `_meta` à mão (reescrever o protocolo, que o enunciado proíbe). Por que (a) atende: `form` está declarado, e o servidor exige só `form` (`_require_capability` aceita quando `elicitation.form is not None`). O custo é uma promessa a mais (`url`) que o agente não implementa. Ela é tratada de forma defensiva na Fase 8 e justificada no README na Fase 11. Evidência no log: o middleware do servidor registra `clientCapabilities`, e os requests do agente aparecem com `{"elicitation": {"form": {}, "url": {}}}`.
+
 Experimento 6.3: remova o `elicitation_callback` e rode de novo. Qual erro volta? Isso é a segunda fricção vista do lado do cliente.
 
 Experimento 6.4: troque `allow_input_required=True` por `False` e restaure um callback que responde sozinho. O ciclo fecha sem nunca perguntar a ninguém. É exatamente o erro que o enunciado descreve ("a Task nunca pausa").
@@ -629,6 +639,7 @@ def linha_alternativas(opcoes):  # exatamente isto, sem prefixo nem saudação (
 Observe o contrato do `AgentExecutor` (docstring em `a2a/server/agent_execution/agent_executor.py`): para `INPUT_REQUIRED`, o executor publica o status e retorna. O framework chama `execute()` de novo quando chega a próxima mensagem com o `taskId`. É o mesmo desenho do MRTR do outro lado: ninguém fica bloqueado esperando o usuário. Os dois protocolos resolveram a ausência de sessão do mesmo jeito.
 
 Tratamento que evita bugs sutis:
+- Consequência da Decisão 6.2: o agente anuncia `url` sem implementá-lo. Se chegar um `input_required` que não seja `elicitation/create` em `mode: "form"` com `requestedSchema.properties.sala`, o `tratar()` não pode estourar `KeyError`. Ele deve levar a Task a `FAILED` com uma mensagem clara (por exemplo, "pedido de entrada nao suportado pelo agente") e não guardar `Pausa`. O validador não cobra isso, mas fecha a lacuna aberta pela capability a mais.
 - O retry pode voltar `input_required` de novo (a pergunta mudou porque outra reserva ocupou a alternativa). `tratar()` lida com isso de forma genérica, sem regra de domínio no agente.
 - `traceparent` da continuação: use o header da nova chamada se vier; se não vier, use o trace-id guardado na `Pausa`. O span-id pode ser novo (`secrets.token_hex(8)`), o trace-id não.
 - Determinismo (verificação 36): o texto da pausa não pode conter ids aleatórios, horário ou contadores. Os `messageId` e `timestamp` gerados pelo SDK não entram no texto comparado.
@@ -890,6 +901,7 @@ Checkpoint 9
    ```
 5. Varredura de segredo antes do push: `git grep -nE '[0-9a-f]{64}'` não pode achar o seu segredo. O `.env` não pode estar no índice.
 6. Sem LLM: nenhuma dependência de `openai`, `anthropic` ou afins em `uv tree`.
+7. Capability (Decisão 6.2): `grep '"clientCapabilities"' mcp.log` e confira que todos os requests do agente trazem `"form": {}`. O `"url": {}` extra é esperado. Confirme que o README explica isso, porque é o ponto em que o avaliador humano compara o log com a forma literal do enunciado.
 
 ---
 
@@ -900,6 +912,7 @@ Substitua o `README.md` pelas quatro seções exigidas:
 - Como rodar: comandos exatos a partir de um clone limpo (`uv sync`, geração do segredo sem o valor, subida dos dois processos, validador com `uv run --python 3.12`).
 - Onde a ponte acontece: arquivo, função e linha da transição `input_required` → `TASK_STATE_INPUT_REQUIRED`, e do retry com `request_state` e `input_responses`.
 - Decisões técnicas: AES-256-GCM via `RequestStateSecurity` (integridade e confidencialidade), TTL de 15 min, chave em `REQUEST_STATE_SECRET` (mínimo de 32 bytes, validado na subida), store de Tasks (`InMemoryTaskStore` do `a2a-sdk`) com a `Pausa` guardada à parte no executor, o `ServerCallContextBuilder` que assume `A2A-Version: 1.0` e por quê, a decisão sobre `form` + `url` na capability e a solução do `traceparent` implícito.
+  - Para a capability (Decisão 6.2, opção (a)): registre como limitação do SDK, como o enunciado autoriza ("documente no README com o trecho da evidência"). Cite o trecho de `mcp/client/session.py` (`_build_capabilities`) e diga três coisas: o agente usa só form; o servidor exige só form; um pedido em URL mode leva a Task a `FAILED`, sem quebrar o agente.
 - Saída do validador: a saída completa da última execução, em bloco de código.
 
 Ensaio final (passo 10 da ordem sugerida do enunciado): `git clone` do seu fork em `/tmp/ensaio`, siga só o README, rode o validador e apague `/tmp/ensaio`. Se algum comando precisou de ajuste, o README está errado.
