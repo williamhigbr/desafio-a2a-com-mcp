@@ -21,10 +21,19 @@ POLITICA_VERSAO = (DADOS / "politica-de-uso.md").read_text(encoding="utf-8").spl
 async def log_requests(ctx, call_next):
     # ctx.meta é o _meta do request; o traceparent chega aqui, não em header HTTP
     meta = ctx.meta or {}
-    print(json.dumps({"method": ctx.method, "id": ctx.request_id,
-                      "traceparent": meta.get("traceparent"),
-                      "clientCapabilities": meta.get("io.modelcontextprotocol/clientCapabilities")},
-                     default=str), file=sys.stderr, flush=True)
+    linha = {"method": ctx.method, "id": ctx.request_id,
+             "traceparent": meta.get("traceparent"),
+             "clientCapabilities": meta.get("io.modelcontextprotocol/clientCapabilities")}
+    # O próprio SDK, ao receber um tools/call, chama internamente o handler de tools/list
+    # (validação dos headers Mcp-Param contra o inputSchema, em _streamable_http_modern.py).
+    # Essa chamada não veio da rede: ela reaproveita o request HTTP do tools/call, cujo header
+    # Mcp-Method diz "tools/call". Num request de rede, o transporte já garantiu que o header
+    # bate com o método do corpo (senão seria -32020), então a divergência identifica a chamada interna.
+    headers = getattr(ctx.request, "headers", None)
+    metodo_http = headers.get("mcp-method") if headers is not None else None
+    if metodo_http and metodo_http != ctx.method:
+        linha["interno"] = f"{ctx.method} disparado pelo servidor durante {metodo_http}, nao veio da rede"
+    print(json.dumps(linha, default=str), file=sys.stderr, flush=True)
     return await call_next(ctx)
 
 def _segredo() -> str:
