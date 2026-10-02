@@ -1,8 +1,11 @@
 # servidor-mcp/servidor.py (esqueleto) [verificado: construtor, middleware, run]
 import json, os, sys
 from pathlib import Path
-from pydantic import BaseModel
-from mcp.server.mcpserver import MCPServer, RequestStateSecurity
+from typing import Annotated, Literal
+
+from pydantic import BaseModel, Field, create_model
+from mcp.server.mcpserver import (AcceptedElicitation, Elicit, ElicitationResult, MCPServer,
+                                  RequestStateSecurity, Resolve)
 from mcp.server.mcpserver.exceptions import ToolError
 
 from dominio import ErroDeDominio, alternativas, conflitos, validar
@@ -88,19 +91,38 @@ def criar_reserva(sala: str, inicio: str, fim: str, responsavel: str) -> Reserva
     return ReservaOut(reserva=reserva["id"], sala=sala, inicio=inicio, fim=fim,
                       responsavel=responsavel, politica=POLITICA_VERSAO)
 
-@mcp.tool()
-def reservar_sala(sala: str, inicio: str, fim: str, responsavel: str) -> ReservaOut:
-    """Reserva uma sala. Se o intervalo estiver ocupado, pergunta qual alternativa usar."""
+def escolha_de_sala(sala: str, inicio: str, fim: str):
+    """Resolver do MRTR: roda ANTES do corpo da tool, em TODA rodada (inclusive no retry).
+
+    Sala livre -> None (nada a perguntar). Conflito -> Elicit com as alternativas;
+    o SDK transforma isso em input_required + requestState selado. Não há callback:
+    o servidor termina a resposta pedindo informação e o cliente volta com um request novo.
+    """
     try:
         i, f = validar(sala, inicio, fim, SALAS)
     except ErroDeDominio as e:
         raise ToolError(str(e))
     if not conflitos(sala, i, f, RESERVAS):
-        return criar_reserva(sala, inicio, fim, responsavel)
-    if not alternativas(sala, i, f, SALAS, RESERVAS):
+        return None
+    alts = alternativas(sala, i, f, SALAS, RESERVAS)
+    if not alts:
         raise ToolError("Sem alternativas disponiveis no intervalo")
-    # TODO Fase 5: aqui entra o MRTR (input_required com elicitation das alternativas).
-    raise ToolError("Conflito com alternativas: MRTR ainda nao implementado")
+    # Literal[...] vira enum no requestedSchema, na ordem calculada pelo domínio.
+    Escolha = create_model("Escolha", sala=(Literal[tuple(alts)],
+                           Field(title="Sala", description="Sala alternativa escolhida")))
+    return Elicit("A sala pedida esta ocupada nesse intervalo. Escolha uma alternativa.", Escolha)
+
+@mcp.tool()
+def reservar_sala(
+    sala: str, inicio: str, fim: str, responsavel: str,
+    escolha: Annotated[ElicitationResult[BaseModel], Resolve(escolha_de_sala)],
+) -> ReservaOut:
+    """Reserva uma sala. Se o intervalo estiver ocupado, pergunta qual alternativa usar."""
+    if isinstance(escolha, AcceptedElicitation):
+        # data None: o resolver não perguntou nada (sala livre). Senão, é a alternativa escolhida.
+        destino = sala if escolha.data is None else escolha.data.sala
+        return criar_reserva(destino, inicio, fim, responsavel)
+    return ReservaOut(reservado=False, motivo="recusado")   # decline ou cancel: não é erro
 
 # Resource: confira no SDK a assinatura exata de @mcp.resource (uri, mime_type)
 @mcp.resource("politica://uso", mime_type="text/markdown")
@@ -108,5 +130,25 @@ def politica_de_uso() -> str:
     return (DADOS / "politica-de-uso.md").read_text(encoding="utf-8")
 
 if __name__ == "__main__":
-    mcp.run("streamable-http", host="127.0.0.1", port=int(os.environ.get("MCP_PORT", 7301)),
-            stateless_http=True, json_response=True)
+    # mcp.run("streamable-http", host="127.0.0.1", port=int(os.environ.get("MCP_PORT", 7301)),
+    #         stateless_http=True, json_response=True)
+
+    import sys
+    import os
+
+    # Local UI testing with MCP Inspector
+    if "--dev" in sys.argv:
+        print("Starting in DEV mode with SSE transport for the Inspector...")
+        # SSE natively handles the stateless MRTR back-and-forth for the UI
+        mcp.run("sse", host="127.0.0.1", port=8000)
+
+    # Production deployment
+    else:
+        print("Starting in PROD mode with streamable-http...")
+        mcp.run(
+            "streamable-http",
+            host="127.0.0.1",
+            port=int(os.environ.get("MCP_PORT", 7301)),
+            stateless_http=True,
+            json_response=True
+        )
