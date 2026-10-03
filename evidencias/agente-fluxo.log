@@ -1,0 +1,24 @@
+INFO:     Started server process [50518]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:7300 (Press CTRL+C to quit)
+{"task": "9fb54c5b-dd42-4744-ad94-c7904117670c", "estado": "TASK_STATE_SUBMITTED", "detalhe": null}
+{"task": "9fb54c5b-dd42-4744-ad94-c7904117670c", "estado": "TASK_STATE_WORKING", "detalhe": null}
+[host] tools descobertas: ['consultar_disponibilidade', 'listar_salas', 'reservar_sala']
+{"task": "9fb54c5b-dd42-4744-ad94-c7904117670c", "estado": "TASK_STATE_INPUT_REQUIRED", "detalhe": "alternativas: sala-fusca, sala-mirante"}
+{"task": "9fb54c5b-dd42-4744-ad94-c7904117670c", "estado": "TASK_STATE_WORKING", "detalhe": "retomada com accept"}
+{"task": "9fb54c5b-dd42-4744-ad94-c7904117670c", "estado": "TASK_STATE_COMPLETED", "detalhe": "res-0003"}
+{"task": "aae62386-ae90-4406-b3f2-e3a266c1e6f3", "estado": "TASK_STATE_SUBMITTED", "detalhe": null}
+{"task": "aae62386-ae90-4406-b3f2-e3a266c1e6f3", "estado": "TASK_STATE_WORKING", "detalhe": null}
+[host] tools descobertas: ['consultar_disponibilidade', 'listar_salas', 'reservar_sala']
+{"task": "aae62386-ae90-4406-b3f2-e3a266c1e6f3", "estado": "TASK_STATE_INPUT_REQUIRED", "detalhe": "alternativas: sala-fusca"}
+{"task": "aae62386-ae90-4406-b3f2-e3a266c1e6f3", "estado": "TASK_STATE_WORKING", "detalhe": "retomada com decline"}
+{"task": "aae62386-ae90-4406-b3f2-e3a266c1e6f3", "estado": "TASK_STATE_CANCELED", "detalhe": "recusado"}
+{"task": "1f939158-19cf-4a6f-8c8d-5ec2ad6acddb", "estado": "TASK_STATE_SUBMITTED", "detalhe": null}
+{"task": "1f939158-19cf-4a6f-8c8d-5ec2ad6acddb", "estado": "TASK_STATE_WORKING", "detalhe": null}
+[host] tools descobertas: ['consultar_disponibilidade', 'listar_salas', 'reservar_sala']
+{"task": "1f939158-19cf-4a6f-8c8d-5ec2ad6acddb", "estado": "TASK_STATE_FAILED", "detalhe": "Error executing tool reservar_sala: Sala inexistente: sala-inexistente"}
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [50518]

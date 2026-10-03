@@ -1,0 +1,93 @@
+INFO:     Started server process [50364]
+INFO:     Waiting for application startup.
+StreamableHTTP session manager started
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:7301 (Press CTRL+C to quit)
+{"method": "tools/list", "id": "d0ff8d6b5dbf", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}}
+{"method": "tools/call", "id": "9b2c3ae279e6", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}}
+{"method": "tools/call", "id": "525826f6e7d8", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}}
+Tool 'voar_delorean' failed: 'Unknown tool: voar_delorean'
+{"method": "resources/read", "id": "062c6b260de6", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}}
+{"method": "resources/read", "id": "2ac0a267285e", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}}
+Resource 'politica://inexistente' failed: 'Unknown resource: politica://inexistente'
+{"method": "tools/list", "id": "73ca8172e34d", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": "73ca8172e34d", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}}
+Tool 'reservar_sala' failed: 'Error executing tool reservar_sala: Sala inexistente: sala-delorean'
+{"method": "tools/list", "id": "2a9782cf4773", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": "2a9782cf4773", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}}
+Tool 'consultar_disponibilidade' failed: 'Error executing tool consultar_disponibilidade: Fora da janela de uso: a politica permite reservas entre 08:00 e 20:00'
+{"method": "tools/list", "id": "12429d340acb", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": "12429d340acb", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}}
+Tool 'consultar_disponibilidade' failed: 'Error executing tool consultar_disponibilidade: Duracao acima do limite: a politica permite no maximo 2 horas'
+{"method": "tools/list", "id": "6953a5426261", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": "6953a5426261", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}}
+Tool 'consultar_disponibilidade' failed: 'Error executing tool consultar_disponibilidade: Intervalo invalido: fim deve ser posterior a inicio'
+{"method": "tools/list", "id": "dd27893a3eb0", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": "dd27893a3eb0", "traceparent": "00-e4a4c8de37b6534a325262838aefcb22-584e200b1c42b812-01", "clientCapabilities": {"elicitation": {"form": {}}}}
+{"method": "tools/list", "id": "e9570fc78687", "traceparent": null, "clientCapabilities": {}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": "e9570fc78687", "traceparent": null, "clientCapabilities": {}}
+{"method": "tools/list", "id": "b369384bf451", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": "b369384bf451", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}}
+{"method": "tools/list", "id": "c1cab16a6287", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": "c1cab16a6287", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}}
+{"method": "tools/list", "id": "9e76ebb6f245", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+requestState rejected on tools/call: seal
+{"method": "tools/list", "id": "b438e8cf7d40", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": "b438e8cf7d40", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}}
+{"method": "tools/list", "id": "b592c94603e2", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": "b592c94603e2", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}}
+{"method": "tools/list", "id": "904c95dfe5a8", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+requestState rejected on tools/call: request binding
+{"method": "tools/list", "id": "4f2c9c6c7e42", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": "4f2c9c6c7e42", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}}
+{"method": "tools/list", "id": "e09a4988ff22", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": "e09a4988ff22", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}}
+{"method": "tools/list", "id": "b92c99ce09af", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": "b92c99ce09af", "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}}
+Tool 'reservar_sala' failed: 'Error executing tool reservar_sala: Sem alternativas disponiveis no intervalo'
+{"method": "tools/list", "id": 1, "traceparent": "00-e4a4c8de37b6534a325262838aefcb22-292c7ce63877634b-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "resources/read", "id": 2, "traceparent": "00-e4a4c8de37b6534a325262838aefcb22-3cf8be816b3b8c95-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 3, "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": 3, "traceparent": "00-e4a4c8de37b6534a325262838aefcb22-94f85379c9a594a6-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 4, "traceparent": "00-e4a4c8de37b6534a325262838aefcb22-4abc934adabb0025-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "resources/read", "id": 5, "traceparent": "00-e4a4c8de37b6534a325262838aefcb22-b36a42b49e2e796a-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 6, "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": 6, "traceparent": "00-e4a4c8de37b6534a325262838aefcb22-8ba072b6b0b0a4b0-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 7, "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": 7, "traceparent": "00-e4a4c8de37b6534a325262838aefcb22-50b775e563bdc539-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 8, "traceparent": "00-dee5b05b816d07a5340fcdcbdc1c9c7e-c10c04716604a29d-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "resources/read", "id": 9, "traceparent": "00-dee5b05b816d07a5340fcdcbdc1c9c7e-b5c24ba0abdabfd5-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 10, "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": 10, "traceparent": "00-dee5b05b816d07a5340fcdcbdc1c9c7e-0b06c41c1f4c1ba6-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 11, "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": 11, "traceparent": "00-dee5b05b816d07a5340fcdcbdc1c9c7e-e3d1c0ba88377959-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 12, "traceparent": "00-c05aec08b2d352c3a43712224e1fcc5b-5f76be7f00c1924f-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "resources/read", "id": 13, "traceparent": "00-c05aec08b2d352c3a43712224e1fcc5b-1c0ac4234ae40396-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 14, "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": 14, "traceparent": "00-c05aec08b2d352c3a43712224e1fcc5b-038a0c77807a5bb7-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 15, "traceparent": "00-9aaf668d27af0a5168d991cdd966adf6-bd7f01184e915643-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "resources/read", "id": 16, "traceparent": "00-9aaf668d27af0a5168d991cdd966adf6-5425610638da0ad1-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 17, "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": 17, "traceparent": "00-9aaf668d27af0a5168d991cdd966adf6-caf5d791fbf843a9-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 18, "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": 18, "traceparent": "00-c05aec08b2d352c3a43712224e1fcc5b-cd28e87ea6094011-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 19, "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": 19, "traceparent": "00-9aaf668d27af0a5168d991cdd966adf6-1a31f1d0d420ca6a-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 20, "traceparent": "00-4d12beb874449c3086e8686261a97694-ee06cbfc3ea25b6b-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "resources/read", "id": 21, "traceparent": "00-4d12beb874449c3086e8686261a97694-57fe28d0301041af-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 22, "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": 22, "traceparent": "00-4d12beb874449c3086e8686261a97694-3dcf2200f8a8cb2c-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+Tool 'reservar_sala' failed: 'Error executing tool reservar_sala: Sala inexistente: sala-delorean'
+{"method": "tools/list", "id": 23, "traceparent": "00-b1a926edbd3481a0ea51683702942dd4-0f9cefa7fadba329-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "resources/read", "id": 24, "traceparent": "00-b1a926edbd3481a0ea51683702942dd4-78176244a910b610-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 25, "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": 25, "traceparent": "00-b1a926edbd3481a0ea51683702942dd4-7da6fe2a61254b44-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 26, "traceparent": "00-0232d57d21945f8ac7c9a4cfdd769d87-abaf8e60ab76460e-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "resources/read", "id": 27, "traceparent": "00-0232d57d21945f8ac7c9a4cfdd769d87-a431cebc2ac4acc2-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 28, "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": 28, "traceparent": "00-0232d57d21945f8ac7c9a4cfdd769d87-b8bb8b18e235dc25-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+StreamableHTTP session manager shutting down
+INFO:     Application shutdown complete.
+INFO:     Finished server process [50364]
