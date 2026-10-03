@@ -1,0 +1,55 @@
+INFO:     Started server process [50508]
+INFO:     Waiting for application startup.
+StreamableHTTP session manager started
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:7301 (Press CTRL+C to quit)
+{"method": "tools/list", "id": 1, "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-5655c3c243ddfa77-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "resources/read", "id": 2, "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-1f3cb43da4e0e820-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 3, "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": 3, "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-29f7de70d48e918e-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 4, "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": 4, "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-a5a1553ceed9921c-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 5, "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-171440f8abfce153-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "resources/read", "id": 6, "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-2e2992085c5dc6fc-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 7, "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": 7, "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-106636ce7aa5c199-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 8, "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": 8, "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-7c63aaacbbc0e8ea-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 9, "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-48f459dc243bdf05-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "resources/read", "id": 10, "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-f559ff45af9fcd19-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+{"method": "tools/list", "id": 11, "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": 11, "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-fdf49bf282c183b4-01", "clientCapabilities": {"elicitation": {"form": {}, "url": {}}}}
+Tool 'reservar_sala' failed: 'Error executing tool reservar_sala: Sala inexistente: sala-inexistente'
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+StreamableHTTP session manager shutting down
+INFO:     Application shutdown complete.
+INFO:     Finished server process [50508]
+INFO:     Started server process [50587]
+INFO:     Waiting for application startup.
+StreamableHTTP session manager started
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:7301 (Press CTRL+C to quit)
+{"method": "tools/list", "id": 3, "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": 3, "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01", "clientCapabilities": {"elicitation": {"form": {}}}}
+{"method": "tools/list", "id": 99, "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+requestState rejected on tools/call: seal
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+StreamableHTTP session manager shutting down
+INFO:     Application shutdown complete.
+INFO:     Finished server process [50587]
+INFO:     Started server process [50611]
+INFO:     Waiting for application startup.
+StreamableHTTP session manager started
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:7301 (Press CTRL+C to quit)
+{"method": "tools/list", "id": 100, "traceparent": null, "clientCapabilities": {"elicitation": {"form": {}}}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": 100, "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01", "clientCapabilities": {"elicitation": {"form": {}}}}
+{"method": "tools/list", "id": 3, "traceparent": null, "clientCapabilities": {}, "interno": "tools/list disparado pelo servidor durante tools/call, nao veio da rede"}
+{"method": "tools/call", "id": 3, "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01", "clientCapabilities": {}}
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+StreamableHTTP session manager shutting down
+INFO:     Application shutdown complete.
+INFO:     Finished server process [50611]

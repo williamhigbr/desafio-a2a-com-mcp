@@ -4,3 +4,6 @@ __pycache__/
 node_modules/
 dist/
 *.log
+# Evidências da Fase 10 (validador e fluxo do avaliador): versionadas de propósito.
+!evidencias/*.log
+.idea/

@@ -1,0 +1,95 @@
+INFO:     Started server process [50340]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:7300 (Press CTRL+C to quit)
+{"task": "fa45d0ae-c56f-4d02-9c4e-ad65d778715f", "estado": "TASK_STATE_SUBMITTED", "detalhe": null}
+{"task": "fa45d0ae-c56f-4d02-9c4e-ad65d778715f", "estado": "TASK_STATE_WORKING", "detalhe": null}
+[host] tools descobertas: ['consultar_disponibilidade', 'listar_salas', 'reservar_sala']
+{"task": "fa45d0ae-c56f-4d02-9c4e-ad65d778715f", "estado": "TASK_STATE_COMPLETED", "detalhe": "res-0006"}
+{"task": "0821822f-67e5-4115-8f7f-daad202b3aaa", "estado": "TASK_STATE_SUBMITTED", "detalhe": null}
+{"task": "0821822f-67e5-4115-8f7f-daad202b3aaa", "estado": "TASK_STATE_WORKING", "detalhe": null}
+[host] tools descobertas: ['consultar_disponibilidade', 'listar_salas', 'reservar_sala']
+{"task": "0821822f-67e5-4115-8f7f-daad202b3aaa", "estado": "TASK_STATE_INPUT_REQUIRED", "detalhe": "alternativas: sala-fusca, sala-mirante"}
+{"task": "0821822f-67e5-4115-8f7f-daad202b3aaa", "estado": "TASK_STATE_INPUT_REQUIRED", "detalhe": "escolha fora do enum: 'escolha=sala-aquario'"}
+{"task": "0821822f-67e5-4115-8f7f-daad202b3aaa", "estado": "TASK_STATE_WORKING", "detalhe": "retomada com accept"}
+{"task": "0821822f-67e5-4115-8f7f-daad202b3aaa", "estado": "TASK_STATE_COMPLETED", "detalhe": "res-0007"}
+{"task": "551d0252-26de-4cc9-807b-d6b905e877cd", "estado": "TASK_STATE_SUBMITTED", "detalhe": null}
+{"task": "551d0252-26de-4cc9-807b-d6b905e877cd", "estado": "TASK_STATE_WORKING", "detalhe": null}
+Failed to detach context
+Traceback (most recent call last):
+  File "~/Documents/GitHub/desafio-a2a-com-mcp/agente/.venv/lib/python3.12/site-packages/opentelemetry/trace/__init__.py", line 602, in use_span
+    yield span
+  File "~/Documents/GitHub/desafio-a2a-com-mcp/agente/.venv/lib/python3.12/site-packages/opentelemetry/trace/__init__.py", line 504, in start_as_current_span
+    yield span
+  File "~/Documents/GitHub/desafio-a2a-com-mcp/agente/.venv/lib/python3.12/site-packages/opentelemetry/trace/__init__.py", line 441, in start_as_current_span
+    yield span
+  File "~/Documents/GitHub/desafio-a2a-com-mcp/agente/.venv/lib/python3.12/site-packages/a2a/utils/telemetry.py", line 242, in async_wrapper
+    result = await func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+GeneratorExit
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "~/Documents/GitHub/desafio-a2a-com-mcp/agente/.venv/lib/python3.12/site-packages/opentelemetry/context/__init__.py", line 127, in detach
+    _RUNTIME_CONTEXT.detach(token)
+  File "~/Documents/GitHub/desafio-a2a-com-mcp/agente/.venv/lib/python3.12/site-packages/opentelemetry/context/contextvars_context.py", line 40, in detach
+    self._current_context.reset(token)
+ValueError: <Token var=<ContextVar name='current_context' default={} at 0x10bf53920> at 0x10d10f280> was created in a different Context
+Task was destroyed but it is pending!
+task: <Task pending name='Task-76' coro=<EventQueueSource._dispatch_loop() done, defined at ~/Documents/GitHub/desafio-a2a-com-mcp/agente/.venv/lib/python3.12/site-packages/a2a/utils/telemetry.py:225> wait_for=<Future pending cb=[Task.task_wakeup()]>>
+Failed to detach context
+Traceback (most recent call last):
+  File "~/Documents/GitHub/desafio-a2a-com-mcp/agente/.venv/lib/python3.12/site-packages/opentelemetry/trace/__init__.py", line 602, in use_span
+    yield span
+  File "~/Documents/GitHub/desafio-a2a-com-mcp/agente/.venv/lib/python3.12/site-packages/opentelemetry/trace/__init__.py", line 504, in start_as_current_span
+    yield span
+  File "~/Documents/GitHub/desafio-a2a-com-mcp/agente/.venv/lib/python3.12/site-packages/opentelemetry/trace/__init__.py", line 441, in start_as_current_span
+    yield span
+  File "~/Documents/GitHub/desafio-a2a-com-mcp/agente/.venv/lib/python3.12/site-packages/a2a/utils/telemetry.py", line 242, in async_wrapper
+    result = await func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+GeneratorExit
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "~/Documents/GitHub/desafio-a2a-com-mcp/agente/.venv/lib/python3.12/site-packages/opentelemetry/context/__init__.py", line 127, in detach
+    _RUNTIME_CONTEXT.detach(token)
+  File "~/Documents/GitHub/desafio-a2a-com-mcp/agente/.venv/lib/python3.12/site-packages/opentelemetry/context/contextvars_context.py", line 40, in detach
+    self._current_context.reset(token)
+ValueError: <Token var=<ContextVar name='current_context' default={} at 0x10bf53920> at 0x10d37dd00> was created in a different Context
+Task was destroyed but it is pending!
+task: <Task pending name='Task-77' coro=<EventQueueSource._dispatch_loop() done, defined at ~/Documents/GitHub/desafio-a2a-com-mcp/agente/.venv/lib/python3.12/site-packages/a2a/utils/telemetry.py:225> wait_for=<Future pending cb=[Task.task_wakeup()]>>
+[host] tools descobertas: ['consultar_disponibilidade', 'listar_salas', 'reservar_sala']
+{"task": "551d0252-26de-4cc9-807b-d6b905e877cd", "estado": "TASK_STATE_INPUT_REQUIRED", "detalhe": "alternativas: sala-mirante"}
+{"task": "551d0252-26de-4cc9-807b-d6b905e877cd", "estado": "TASK_STATE_WORKING", "detalhe": "retomada com decline"}
+{"task": "551d0252-26de-4cc9-807b-d6b905e877cd", "estado": "TASK_STATE_CANCELED", "detalhe": "recusado"}
+{"task": "ab35c6f8-a1c8-4201-b888-d772ba14b19c", "estado": "TASK_STATE_SUBMITTED", "detalhe": null}
+{"task": "ab35c6f8-a1c8-4201-b888-d772ba14b19c", "estado": "TASK_STATE_WORKING", "detalhe": null}
+[host] tools descobertas: ['consultar_disponibilidade', 'listar_salas', 'reservar_sala']
+{"task": "ab35c6f8-a1c8-4201-b888-d772ba14b19c", "estado": "TASK_STATE_INPUT_REQUIRED", "detalhe": "alternativas: sala-mirante"}
+{"task": "d4d2c7c6-645c-43f9-8882-b2149be65d1f", "estado": "TASK_STATE_SUBMITTED", "detalhe": null}
+{"task": "d4d2c7c6-645c-43f9-8882-b2149be65d1f", "estado": "TASK_STATE_WORKING", "detalhe": null}
+[host] tools descobertas: ['consultar_disponibilidade', 'listar_salas', 'reservar_sala']
+{"task": "d4d2c7c6-645c-43f9-8882-b2149be65d1f", "estado": "TASK_STATE_INPUT_REQUIRED", "detalhe": "alternativas: sala-mirante"}
+{"task": "ab35c6f8-a1c8-4201-b888-d772ba14b19c", "estado": "TASK_STATE_WORKING", "detalhe": "retomada com accept"}
+{"task": "ab35c6f8-a1c8-4201-b888-d772ba14b19c", "estado": "TASK_STATE_COMPLETED", "detalhe": "res-0008"}
+{"task": "d4d2c7c6-645c-43f9-8882-b2149be65d1f", "estado": "TASK_STATE_WORKING", "detalhe": "retomada com accept"}
+{"task": "d4d2c7c6-645c-43f9-8882-b2149be65d1f", "estado": "TASK_STATE_COMPLETED", "detalhe": "res-0009"}
+{"task": "3dffdaa7-d17f-4ad5-8f40-2ca5fe6cf4b7", "estado": "TASK_STATE_SUBMITTED", "detalhe": null}
+{"task": "3dffdaa7-d17f-4ad5-8f40-2ca5fe6cf4b7", "estado": "TASK_STATE_WORKING", "detalhe": null}
+[host] tools descobertas: ['consultar_disponibilidade', 'listar_salas', 'reservar_sala']
+{"task": "3dffdaa7-d17f-4ad5-8f40-2ca5fe6cf4b7", "estado": "TASK_STATE_FAILED", "detalhe": "Error executing tool reservar_sala: Sala inexistente: sala-delorean"}
+{"task": "00e5386a-6557-431b-a5e3-7073bc50c816", "estado": "TASK_STATE_SUBMITTED", "detalhe": null}
+{"task": "00e5386a-6557-431b-a5e3-7073bc50c816", "estado": "TASK_STATE_WORKING", "detalhe": null}
+[host] tools descobertas: ['consultar_disponibilidade', 'listar_salas', 'reservar_sala']
+{"task": "00e5386a-6557-431b-a5e3-7073bc50c816", "estado": "TASK_STATE_INPUT_REQUIRED", "detalhe": "alternativas: sala-fusca, sala-mirante"}
+{"task": "dc068870-7f05-4aaa-844c-e57f23493352", "estado": "TASK_STATE_SUBMITTED", "detalhe": null}
+{"task": "dc068870-7f05-4aaa-844c-e57f23493352", "estado": "TASK_STATE_WORKING", "detalhe": null}
+[host] tools descobertas: ['consultar_disponibilidade', 'listar_salas', 'reservar_sala']
+{"task": "dc068870-7f05-4aaa-844c-e57f23493352", "estado": "TASK_STATE_INPUT_REQUIRED", "detalhe": "alternativas: sala-fusca, sala-mirante"}
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [50340]

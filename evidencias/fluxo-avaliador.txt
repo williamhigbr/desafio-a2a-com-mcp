@@ -1,0 +1,24 @@
+mcp_pid=50503 agente_pid=50514 (dono da 7300: 50518)
+### passo 3: card vs 07
+card identico ao 07 (exceto url)
+### passo 7
+{"state":"TASK_STATE_INPUT_REQUIRED","texto":"alternativas: sala-fusca, sala-mirante"}
+requestState na resposta A2A: 0
+### passo 8
+"TASK_STATE_COMPLETED"
+{"state":"TASK_STATE_COMPLETED","artifact":{"name":"reserva","reserva":{"reserva":"res-0003","sala":"sala-mirante","inicio":"2026-11-03T14:00:00-03:00","fim":"2026-11-03T15:00:00-03:00","responsavel":"Marty","politica":"2026-11-01"}}}
+### passo 9
+{"state":"TASK_STATE_INPUT_REQUIRED","texto":"alternativas: sala-fusca"}
+{"state":"TASK_STATE_CANCELED","texto":"Reserva recusada."}
+### passo 10
+{"state":"TASK_STATE_FAILED","texto":"Error executing tool reservar_sala: Sala inexistente: sala-inexistente"}
+[{"role":"ROLE_USER","t":"reservar sala=sala-inexistente inicio=2026-11-03T09:00:00-03:00 fim=2026-11-03T10:00:00-03:00 responsavel=Doc"},{"role":"ROLE_AGENT","t":"Error executing tool reservar_sala: Sala inexistente: sala-inexistente"}]
+### passo 11
+{"resultType":"input_required","enum":["sala-fusca","sala-mirante"]}
+{"jsonrpc":"2.0","id":99,"error":{"code":-32602,"message":"Invalid or expired requestState","data":{"reason":"invalid_request_state"}}} http=400
+### passo 12
+MCP parado (7301 livre: sim)
+MCP reiniciado
+{"resultType":"complete","isError":false,"sala":"sala-fusca","reserva":"res-0003"}
+### passo 13
+{"jsonrpc":"2.0","id":3,"error":{"code":-32021,"message":"Client did not declare the form elicitation capability required by resolver '__main__:escolha_de_sala'","data":{"requiredCapabilities":{"elicitation":{"form":{}}}}}} http=400
